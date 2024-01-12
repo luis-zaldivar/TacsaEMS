@@ -7,13 +7,13 @@ eliminar_texto_previo(archivo_entrada, archivo_salida)  # Eliminamos texto previ
 salida = separar_por_formato('ems_limpio.txt')  # Separamos el contenido del archivo limpio por el formato de fecha y hora
 FindTime = buscar_en_tupla(salida, '14:13:59')  # Buscamos en las tuplas desde la hora de inicio
 
-# Verificamos si hay resultados antes de realizar la depuración
+#Verificamos si hay resultados antes de realizar la depuración
 if FindTime:
     print("Resultados encontrados.")
     # Iteramos sobre las tuplas para crear un diccionario con pares de clave-valor
     for i in range(len(FindTime)):
         FindTime[i] = {'Fecha y Hora': FindTime[i][0], 'Otro Campo': FindTime[i][1]}
-# Iteramos nuevamente para realizar la depuración
+#Iteramos nuevamente para realizar la depuración
     for i in range(len(FindTime)):
         if "*" in FindTime[i].get('Otro Campo'):
             DataClear = re.split(r'\d\*', FindTime[i].get('Otro Campo'))
