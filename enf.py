@@ -54,50 +54,48 @@ def separar_por_formato(archivo):
 # Función para buscar en las tuplas desde la hora de inicio y avanzar un segundo más
 def buscar_en_tupla(lista_tuplas, hora_inicio):
     hora_inicio = hora_inicio + ".000"
-    formato_hora = '%H:%M:%S.%f'  # Formato para la hora
-
-    # Convertimos la hora de inicio a objeto de datetime
+    formato_hora = '%d-%m-%y;%H:%M:%S.%f'  # Ajustamos el formato para incluir la fecha
     hora_inicio_dt = datetime.strptime(hora_inicio, formato_hora)
 
-    resultados = []  # Lista para almacenar los resultados que cumplen con el rango de tiempo
+    # Encontramos la tupla más cercana
+    tupla_mas_cercana = min(lista_tuplas, key=lambda tupla: abs(datetime.strptime(tupla[0], formato_hora) - hora_inicio_dt))
 
-    # Iteramos sobre las tuplas buscando las horas que estén dentro del rango especificado
-    for t in lista_tuplas:
-        separator = t[0].split(";")  # Separamos la hora de la tupla
-        try:
-            hora_actual = datetime.strptime(separator[1], formato_hora)  # Convertimos la hora actual a objeto de datetime
-            if hora_inicio_dt <= hora_actual <= hora_inicio_dt + timedelta(seconds=1):  # Corregimos la condición de rango
-                resultados.append(t)  # Si está en el rango, la añadimos a los resultados
-        except ValueError:
-            continue  # En caso de error, continuamos con la siguiente iteración
+    # Calculamos la hora de inicio para tomar desde un segundo después
+    hora_inicio_nueva = datetime.strptime(tupla_mas_cercana[0], formato_hora) + timedelta(seconds=1)
+
+    # Filtramos las tuplas que están a partir de la nueva hora de inicio
+    resultados = [tupla for tupla in lista_tuplas if datetime.strptime(tupla[0], formato_hora) >= hora_inicio_nueva and datetime.strptime(tupla[0], formato_hora) <= hora_inicio_nueva + timedelta(minutes=1)]
 
     if not resultados:
-        # Si no se encontraron resultados, buscaremos la hora más cercana
-        hora_mas_cercana = min(lista_tuplas, key=lambda tupla: abs(datetime.strptime(tupla[0].split(";")[1], formato_hora) - hora_inicio_dt))
-        print(f"No se encontró la hora exacta. La hora más cercana es: {hora_mas_cercana[0]}")
-        
-    return resultados  # Retornamos las tuplas que cumplen con el rango de tiempo
+        print(f"No se encontraron datos desde un segundo después de la hora más cercana: {hora_inicio_nueva.strftime(formato_hora)}")
+
+    return resultados
+
+
 
 
 def depuracion(FindTime):
     if FindTime == []:
         print("No hay datos que depurar")
-    else:# Verificamos si hay resultados antes de realizar la depuración
+    else:
+        # Verificamos si hay resultados antes de realizar la depuración
         if FindTime:
             print("Resultados encontrados.")
             # Iteramos sobre las tuplas para crear un diccionario con pares de clave-valor
             for i in range(len(FindTime)):
                 FindTime[i] = {'Fecha y Hora': FindTime[i][0], 'Otro Campo': FindTime[i][1]}
-                
             # Iteramos nuevamente para realizar la depuración
             for i in range(len(FindTime)):
                 if "*" in FindTime[i].get('Otro Campo'):
                     DataClear = re.split(r'\d\*', FindTime[i].get('Otro Campo'))
                     FindTime[i]['Otro Campo'] = DataClear[0]
-                else:
-                    break
+                    print("ok2")
+                # Convierte la fecha y hora a cadena antes de imprimir
+                print(str(FindTime[i].get('Fecha y Hora')))
         else:
             print("No se encontraron datos en el rango de tiempo especificado.")
+    return FindTime
+
 
 # Código principal
 if __name__ == "__main__":
@@ -106,8 +104,8 @@ if __name__ == "__main__":
     depurar_archivo(archivo_entrada, archivo_salida)
     eliminar_texto_previo(archivo_entrada, archivo_salida)  # Eliminamos texto previo al patrón en el archivo de entrada
     salida = separar_por_formato('ems_limpio.txt')  # Separamos el contenido del archivo limpio por el formato de fecha y hora
+    FindTime = buscar_en_tupla(salida, '24-01-11;14:13:59')  # Ajustamos el formato de la hora # Buscamos en las tuplas desde la hora de inicio
     
+    FindTime=depuracion(FindTime)
     
-    FindTime = buscar_en_tupla(salida, '14:13:59')  # Buscamos en las tuplas desde la hora de inicio
-    depuracion(FindTime)
     
