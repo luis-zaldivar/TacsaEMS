@@ -76,29 +76,27 @@ def buscar_en_tupla(lista_tuplas, hora_inicio, hora_fin):
     return resultados  # Retornamos las tuplas que cumplen con el rango de tiempo
 
 
+def depuracion(ListTupla):
+    if ListTupla==[]:
+        print("No hay datos que depurar")
+    else:
+        for i in range(len(FindTime)):
+            # Crear un diccionario con pares de clave-valor a partir de la tupla
+            FindTime[i] = {'Fecha y Hora': FindTime[i][0], 'Otro Campo': FindTime[i][1]}
+            
+        for i in range(len(FindTime)):
+            if "*"in(FindTime[i].get('Otro Campo')):
+                DataClear=re.split(r'\d\*',FindTime[i].get('Otro Campo'))
+                FindTime[i]['Otro Campo'] = DataClear[0]
+            else: break
+
 # Código principal
 if __name__ == "__main__":
-    archivo_entrada = "ems_limpio.txt"  # Nombre del archivo de entrada
-    archivo_salida = "ems_limpio2.txt"  # Nombre del archivo de salida
+    archivo_entrada = "ems.cap"  # Nombre del archivo de entrada
+    archivo_salida = "ems_limpio.txt"  # Nombre del archivo de salida
     depurar_archivo(archivo_entrada, archivo_salida)
     a=depurar_archivo
     eliminar_texto_previo(archivo_entrada, archivo_salida)  # Eliminamos texto previo al patrón en el archivo de entrada
-    
-    salida = separar_por_formato('ems_limpio2.txt')  # Separamos el contenido del archivo limpio por el formato de fecha y hora
-    FindTime = buscar_en_tupla(salida, '19:13:59', '19:14:47')  # Buscamos en las tuplas dentro de un rango de tiempo
-    
-    for i in range(len(FindTime)):
-        # Crear un diccionario con pares de clave-valor a partir de la tupla
-        FindTime[i] = {'Fecha y Hora': FindTime[i][0], 'Otro Campo': FindTime[i][1]}
-        print(type(FindTime[i]))
-
-    
-    if len(FindTime)==0:
-        print("no hay nada")
-    else:
-        for i in range(len(FindTime)-1):
-            a=FindTime[i][1]
-            if "*" in a:
-                a=a.split("*")
-                FindTime[i][1]=a[0]
-                print(FindTime[i])
+    salida = separar_por_formato('ems_limpio.txt')  # Separamos el contenido del archivo limpio por el formato de fecha y hora
+    FindTime = buscar_en_tupla(salida, '14:13:59', '14:14:47')  # Buscamos en las tuplas dentro de un rango de tiempo
+    depuracion(FindTime)
