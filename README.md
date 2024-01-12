@@ -9,3 +9,9 @@ salida = separar_por_formato('ems_limpio.txt')  # Separamos el contenido del arc
 FindTime = buscar_en_tupla(salida, '14:13:59')  # Buscamos en las tuplas desde la hora de inicio
 depuracion(FindTime)
 ```
+
+Ejmplo de la salida que da cuando ponemos una hora incorrecta:
+```python
+No se encontró la hora exacta. La hora más cercana es: 24-01-11;19:12:30.948
+No hay datos que depurar
+```
