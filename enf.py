@@ -1,6 +1,7 @@
 # Importamos las librerías necesarias
 import re  # Para operaciones con expresiones regulares
-from datetime import datetime  # Para manipular fechas y horas
+from datetime import datetime, timedelta  # Para manipular fechas y horas
+
 
 # Función para eliminar texto previo a cierto patrón y guardar el resultado en un nuevo archivo
 def eliminar_texto_previo(archivo_entrada, archivo_salida):
@@ -51,15 +52,15 @@ def separar_por_formato(archivo):
         return lista_final
 
 
-# Función para buscar en las tuplas dentro de un rango de tiempo específico
-def buscar_en_tupla(lista_tuplas, hora_inicio, hora_fin):
-    hora_inicio=hora_inicio+".000"
-    hora_fin=hora_fin+".999"
+# Función para buscar en las tuplas desde la hora de inicio y avanzar un segundo más
+# Función para buscar en las tuplas desde la hora de inicio y avanzar un segundo más
+# Función para buscar en las tuplas desde la hora de inicio y avanzar un segundo más
+def buscar_en_tupla(lista_tuplas, hora_inicio):
+    hora_inicio = hora_inicio + ".000"
     formato_hora = '%H:%M:%S.%f'  # Formato para la hora
 
-    # Convertimos las horas de inicio y fin a objetos de tiempo
-    hora_inicio_dt = datetime.strptime(hora_inicio, formato_hora).time()
-    hora_fin_dt = datetime.strptime(hora_fin, formato_hora).time()
+    # Convertimos la hora de inicio a objeto de datetime
+    hora_inicio_dt = datetime.strptime(hora_inicio, formato_hora)
 
     resultados = []  # Lista para almacenar los resultados que cumplen con el rango de tiempo
 
@@ -67,29 +68,59 @@ def buscar_en_tupla(lista_tuplas, hora_inicio, hora_fin):
     for t in lista_tuplas:
         separator = t[0].split(";")  # Separamos la hora de la tupla
         try:
-            hora_actual = datetime.strptime(separator[1], formato_hora).time()  # Convertimos la hora actual a objeto de tiempo
-            if hora_inicio_dt <= hora_actual <= hora_fin_dt:  # Verificamos si la hora está dentro del rango
+            hora_actual = datetime.strptime(separator[1], formato_hora)  # Convertimos la hora actual a objeto de datetime
+            if hora_inicio_dt <= hora_actual <= hora_inicio_dt + timedelta(seconds=1):  # Corregimos la condición de rango
                 resultados.append(t)  # Si está en el rango, la añadimos a los resultados
         except ValueError:
             continue  # En caso de error, continuamos con la siguiente iteración
 
+    if not resultados:
+        # Si no se encontraron resultados, buscaremos la hora más cercana
+        hora_mas_cercana = min(lista_tuplas, key=lambda tupla: abs(datetime.strptime(tupla[0].split(";")[1], formato_hora) - hora_inicio_dt))
+        print(f"No se encontró la hora exacta. La hora más cercana es: {hora_mas_cercana[0]}")
+        
     return resultados  # Retornamos las tuplas que cumplen con el rango de tiempo
 
 
+def depuracion(FindTime):
+    if FindTime == []:
+        print("No hay datos que depurar")
+    else:
+        for i in range(len(FindTime)):
+            # Crear un diccionario con pares de clave-valor a partir de la tupla
+            FindTime[i] = {'Fecha y Hora': FindTime[i][0], 'Otro Campo': FindTime[i][1]}
+            
+        for i in range(len(FindTime)):
+            if "*" in FindTime[i].get('Otro Campo'):
+                DataClear = re.split(r'\d\*', FindTime[i].get('Otro Campo'))
+                FindTime[i]['Otro Campo'] = DataClear[0]
+            else:
+                break
+
 # Código principal
 if __name__ == "__main__":
-    archivo_entrada = "ems_limpio.txt"  # Nombre del archivo de entrada
-    archivo_salida = "ems_limpio2.txt"  # Nombre del archivo de salida
+    archivo_entrada = "ems.cap"  # Nombre del archivo de entrada
+    archivo_salida = "ems_limpio.txt"  # Nombre del archivo de salida
     depurar_archivo(archivo_entrada, archivo_salida)
-    a=depurar_archivo
     eliminar_texto_previo(archivo_entrada, archivo_salida)  # Eliminamos texto previo al patrón en el archivo de entrada
-    print(a)
-    salida = separar_por_formato('ems_limpio2.txt')  # Separamos el contenido del archivo limpio por el formato de fecha y hora
-    FindTime = buscar_en_tupla(salida, '14:43:44', '14:43:47')  # Buscamos en las tuplas dentro de un rango de tiempo
-    for i in FindTime:
-        print("".join(i))  # Imprimimos las tuplas encontradas en el rango de tiempo
-
-
-'''
-todavía falta validar que las horas existan dentro del archivo
-'''
+    salida = separar_por_formato('ems_limpio.txt')  # Separamos el contenido del archivo limpio por el formato de fecha y hora
+    
+    
+    FindTime = buscar_en_tupla(salida, '14:13:59')  # Buscamos en las tuplas desde la hora de inicio
+    
+    # Verificamos si hay resultados antes de realizar la depuración
+    if FindTime:
+        print("Resultados encontrados.")
+        # Iteramos sobre las tuplas para crear un diccionario con pares de clave-valor
+        for i in range(len(FindTime)):
+            FindTime[i] = {'Fecha y Hora': FindTime[i][0], 'Otro Campo': FindTime[i][1]}
+            
+        # Iteramos nuevamente para realizar la depuración
+        for i in range(len(FindTime)):
+            if "*" in FindTime[i].get('Otro Campo'):
+                DataClear = re.split(r'\d\*', FindTime[i].get('Otro Campo'))
+                FindTime[i]['Otro Campo'] = DataClear[0]
+            else:
+                break
+    else:
+        print("No se encontraron datos en el rango de tiempo especificado.")
