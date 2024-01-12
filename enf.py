@@ -51,9 +51,6 @@ def separar_por_formato(archivo):
         lista_final = list(zip(patrones, datos_separados))
         return lista_final
 
-
-# Función para buscar en las tuplas desde la hora de inicio y avanzar un segundo más
-# Función para buscar en las tuplas desde la hora de inicio y avanzar un segundo más
 # Función para buscar en las tuplas desde la hora de inicio y avanzar un segundo más
 def buscar_en_tupla(lista_tuplas, hora_inicio):
     hora_inicio = hora_inicio + ".000"
@@ -85,17 +82,22 @@ def buscar_en_tupla(lista_tuplas, hora_inicio):
 def depuracion(FindTime):
     if FindTime == []:
         print("No hay datos que depurar")
-    else:
-        for i in range(len(FindTime)):
-            # Crear un diccionario con pares de clave-valor a partir de la tupla
-            FindTime[i] = {'Fecha y Hora': FindTime[i][0], 'Otro Campo': FindTime[i][1]}
-            
-        for i in range(len(FindTime)):
-            if "*" in FindTime[i].get('Otro Campo'):
-                DataClear = re.split(r'\d\*', FindTime[i].get('Otro Campo'))
-                FindTime[i]['Otro Campo'] = DataClear[0]
-            else:
-                break
+    else:# Verificamos si hay resultados antes de realizar la depuración
+        if FindTime:
+            print("Resultados encontrados.")
+            # Iteramos sobre las tuplas para crear un diccionario con pares de clave-valor
+            for i in range(len(FindTime)):
+                FindTime[i] = {'Fecha y Hora': FindTime[i][0], 'Otro Campo': FindTime[i][1]}
+                
+            # Iteramos nuevamente para realizar la depuración
+            for i in range(len(FindTime)):
+                if "*" in FindTime[i].get('Otro Campo'):
+                    DataClear = re.split(r'\d\*', FindTime[i].get('Otro Campo'))
+                    FindTime[i]['Otro Campo'] = DataClear[0]
+                else:
+                    break
+        else:
+            print("No se encontraron datos en el rango de tiempo especificado.")
 
 # Código principal
 if __name__ == "__main__":
@@ -107,20 +109,5 @@ if __name__ == "__main__":
     
     
     FindTime = buscar_en_tupla(salida, '14:13:59')  # Buscamos en las tuplas desde la hora de inicio
+    depuracion(FindTime)
     
-    # Verificamos si hay resultados antes de realizar la depuración
-    if FindTime:
-        print("Resultados encontrados.")
-        # Iteramos sobre las tuplas para crear un diccionario con pares de clave-valor
-        for i in range(len(FindTime)):
-            FindTime[i] = {'Fecha y Hora': FindTime[i][0], 'Otro Campo': FindTime[i][1]}
-            
-        # Iteramos nuevamente para realizar la depuración
-        for i in range(len(FindTime)):
-            if "*" in FindTime[i].get('Otro Campo'):
-                DataClear = re.split(r'\d\*', FindTime[i].get('Otro Campo'))
-                FindTime[i]['Otro Campo'] = DataClear[0]
-            else:
-                break
-    else:
-        print("No se encontraron datos en el rango de tiempo especificado.")
