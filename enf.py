@@ -33,12 +33,14 @@ def depurar_archivo(archivo_entrada, archivo_salida):
         archivo_salida.write(contenido_depurado)
 
 def separar_por_formato(archivo):
-    contenido = read_lines(archivo)
+    lines = read_lines(archivo)
+    contenido = ''.join(lines)  # Combina las líneas en una cadena
     patrones = re.findall(r'\d{2}-\d{2}-\d{2};\d{2}:\d{2}:\d{2}\.\d+', contenido)
     datos_separados = re.split(r'\d{2}-\d{2}-\d{2};\d{2}:\d{2}:\d{2}\.\d+', contenido)
     datos_separados = [dato.strip() for dato in datos_separados if dato.strip()]
     lista_final = list(zip(patrones, datos_separados))
     return lista_final
+
 
 def buscar_en_tupla(lista_tuplas, hora_inicio):
     hora_inicio = hora_inicio + ".000"
@@ -63,7 +65,6 @@ def depuracion(find_time):
             if "*" in find_time[i]['Otro Campo']:
                 data_clear = re.split(r'\d\*', find_time[i]['Otro Campo'])
                 find_time[i]['Otro Campo'] = data_clear[0]
-                print("ok2")
             print(str(find_time[i]['Fecha y Hora']))
 
     return find_time
